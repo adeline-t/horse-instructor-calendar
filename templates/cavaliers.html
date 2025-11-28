@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Cavaliers</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav>
+      <h1>🐴 Gestion des Cavaliers</h1>
+      <div>
+        <a href="/" class="btn">📅 Planning</a>
+        <a href="/equides" class="btn">🐎 Équidés</a>
+        <a href="/heures" class="btn">⏱️ Heures</a>
+        <a href="/cours-recurrents" class="btn">🔄 Cours</a>
+        <a href="/disponibilites" class="btn">⏰ Disponibilités</a>
+        <a href="/stats" class="btn">📊 Statistiques</a>
+      </div>
+    </nav>
+
+
+    <div class="container">
+        <div class="cavalier-form">
+            <h2>➕ Ajouter un cavalier</h2>
+
+            <div class="form-row">
+                <div class="form-group" style="flex: 2;">
+                    <label>Nom *</label>
+                    <input type="text" id="cavalierName" placeholder="Nom du cavalier" autocomplete="off">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="cavalierEmail" placeholder="email@example.com">
+                </div>
+                <div class="form-group">
+                    <label>Téléphone</label>
+                    <input type="tel" id="cavalierPhone" placeholder="06 12 34 56 78">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Heures forfait CO</label>
+                    <input type="number" id="cavalierHeuresForfait" value="1" min="0" step="0.5">
+                </div>
+                <div class="form-group">
+                    <label>Heures cours particulier</label>
+                    <input type="number" id="cavalierHeuresPart" value="0" min="0" step="0.5">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Date de début</label>
+                    <input type="date" id="cavalierStartDate">
+                </div>
+                <div class="form-group">
+                    <label>Date de fin</label>
+                    <input type="date" id="cavalierEndDate">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group" style="flex: 1;">
+                    <label>Notes</label>
+                    <textarea id="cavalierNotes" placeholder="Notes complémentaires..." rows="2"></textarea>
+                </div>
+            </div>
+
+            <button id="addCavalierBtn" class="btn">✅ Ajouter</button>
+        </div>
+
+        <div class="cavalier-list">
+            <h2>📋 Liste des cavaliers</h2>
+            <ul id="cavaliersList"></ul>
+        </div>
+    </div>
+
+    <!-- Modal pour éditer -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close-edit">×</span>
+            <h3>✏️ Modifier <span id="editCavalierName"></span></h3>
+
+            <div class="form-group">
+                <label>Nom *</label>
+                <input type="text" id="editName" placeholder="Nom du cavalier">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="editEmail" placeholder="email@example.com">
+                </div>
+                <div class="form-group">
+                    <label>Téléphone</label>
+                    <input type="tel" id="editPhone" placeholder="06 12 34 56 78">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Heures forfait CO</label>
+                    <input type="number" id="editHeuresForfait" min="0" step="0.5">
+                </div>
+                <div class="form-group">
+                    <label>Heures cours particulier</label>
+                    <input type="number" id="editHeuresPart" min="0" step="0.5">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Date de début</label>
+                <input type="date" id="editStartDate">
+                <button class="btn-clear" onclick="document.getElementById('editStartDate').value = ''">❌ Effacer</button>
+            </div>
+
+            <div class="form-group">
+                <label>Date de fin</label>
+                <input type="date" id="editEndDate">
+                <button class="btn-clear" onclick="document.getElementById('editEndDate').value = ''">❌ Effacer</button>
+            </div>
+
+            <div class="form-group">
+                <label>Notes</label>
+                <textarea id="editNotes" rows="3" placeholder="Notes complémentaires..."></textarea>
+            </div>
+
+            <div class="modal-actions">
+                <button id="saveEditBtn" class="btn">💾 Enregistrer</button>
+                <button id="cancelEditBtn" class="btn btn-secondary">❌ Annuler</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal pour allouer des chevaux -->
+    <div id="allocModal" class="modal">
+        <div class="modal-content">
+            <span class="close-alloc">×</span>
+            <h3>🐎 Allouer des chevaux à <span id="allocCavalierName"></span></h3>
+
+            <p style="color: #666; font-size: 14px; margin-bottom: 20px;">
+                Sélectionnez les chevaux que ce cavalier peut monter et définissez optionnellement des périodes d'allocation.
+            </p>
+
+            <div id="allocEquidesList" class="alloc-equides-list">
+                <!-- Liste générée dynamiquement -->
+            </div>
+
+            <div class="modal-actions">
+                <button id="saveAllocBtn" class="btn">💾 Enregistrer</button>
+                <button id="cancelAllocBtn" class="btn btn-secondary">❌ Annuler</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='cavaliers.js') }}"></script>
+</body>
+</html>

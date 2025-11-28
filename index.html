@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Equestrian Management System</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/components.css">
+<script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
+</head>
+<body class="theme-light">
+    <!-- Application Header -->
+    <header class="app-header">
+        <div class="header-container">
+            <div class="header-brand">
+                <h1>Equestrian Management</h1>
+            </div>
+            
+            <nav class="header-nav">
+                <ul class="nav-menu">
+                    <li><a href="#dashboard" data-nav="dashboard" class="nav-link">Dashboard</a></li>
+                    <li><a href="#horses" data-nav="horses" class="nav-link">Horses</a></li>
+                    <li><a href="#riders" data-nav="riders" class="nav-link">Riders</a></li>
+                    <li><a href="#lessons" data-nav="lessons" class="nav-link">Lessons</a></li>
+                    <li><a href="#availability" data-nav="availability" class="nav-link">Availability</a></li>
+                    <li><a href="#schedule" data-nav="schedule" class="nav-link">Schedule</a></li>
+                    <li><a href="#statistics" data-nav="statistics" class="nav-link">Statistics</a></li>
+                </ul>
+            </nav>
+            
+            <div class="header-actions">
+                <button class="btn btn-icon" data-theme-toggle title="Toggle Theme">
+                    <span class="icon">🌙</span>
+                </button>
+                <div class="user-menu">
+                    <button class="btn btn-text" id="user-menu-toggle">
+                        <span class="user-name">Admin User</span>
+                        <span class="user-avatar">👤</span>
+                    </button>
+                    <div class="user-dropdown" id="user-dropdown">
+                        <a href="#" class="dropdown-item">Profile</a>
+                        <a href="#" class="dropdown-item">Settings</a>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" class="dropdown-item" data-logout>Logout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="app-main">
+        <div class="main-container">
+            <!-- Page content will be loaded here dynamically -->
+            <div id="main-content">
+                <!-- Loading initial content -->
+                <div class="page-loading">
+                    <div class="loading-spinner">
+                        <div class="spinner"></div>
+                        <p>Loading application...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Application Footer -->
+    <footer class="app-footer">
+        <div class="footer-container">
+            <p>&copy; 2024 Equestrian Management System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Global Notifications Container -->
+    <div id="notifications-container" class="notifications-container"></div>
+
+    <!-- Scripts -->
+    <!-- Load core libraries first -->
+    <script src="js/core/utils.js"></script>
+    <script src="js/core/components.js"></script>
+    <script src="js/core/dataService.js"></script>
+    <script src="js/core/app.js"></script>
+    
+    <!-- Page-specific scripts will be loaded dynamically -->
+    
+    <!-- Global Error Handler (for development only) -->
+    <script>
+        // Remove this in production
+        if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+            window.addEventListener('error', function(e) {
+                console.error('Global Error:', e.error);
+            });
+        }
+    </script>
+</body>
+</html>

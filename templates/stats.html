@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statistiques</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<nav>
+  <h1>📊 Statistiques des Séances</h1>
+  <div>
+    <a href="/" class="btn">📅 Planning</a>
+    <a href="/cavaliers" class="btn">👥 Cavaliers</a>
+    <a href="/equides" class="btn">🐴 Équidés</a>
+    <a href="/heures" class="btn">⏱️ Heures</a>
+    <a href="/cours-recurrents" class="btn">🔄 Cours</a>
+    <a href="/disponibilites" class="btn">⏰ Disponibilités</a>
+  </div>
+</nav>
+
+
+    <div class="container">
+        <div class="stats-filters">
+            <h3>Filtrer par période</h3>
+            <select id="monthFilter">
+                <option value="">Tous les mois</option>
+            </select>
+            <select id="yearFilter">
+                <option value="">Toutes les années</option>
+            </select>
+            <button id="filterBtn" class="btn">Filtrer</button>
+            <button id="resetBtn" class="btn btn-secondary">Réinitialiser</button>
+        </div>
+
+        <div class="stats-container">
+            <div class="stats-section">
+                <h2>Séances par cavalier</h2>
+                <div id="cavalierStats"></div>
+            </div>
+
+            <div class="stats-section">
+                <h2>Types de travail</h2>
+                <div id="workTypeStats"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='stats.js') }}"></script>
+</body>
+</html>

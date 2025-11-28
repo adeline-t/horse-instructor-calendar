@@ -1,0 +1,56 @@
+{
+  "sessions": [
+    {
+      "id": 1,
+      "date": "2024-01-15",
+      "day": "monday",
+      "start_time": "09:00",
+      "end_time": "10:30",
+      "rider_id": 1,
+      "horse_id": 2,
+      "lesson_type": "private",
+      "instructor_id": 1,
+      "status": "completed",
+      "notes": "Good progress with basic gaits"
+    },
+    {
+      "id": 2,
+      "date": "2024-01-15",
+      "day": "monday",
+      "start_time": "11:00",
+      "end_time": "12:30",
+      "rider_id": 2,
+      "horse_id": 1,
+      "lesson_type": "group",
+      "instructor_id": 1,
+      "status": "completed",
+      "notes": "Group lesson with 3 riders"
+    },
+    {
+      "id": 3,
+      "date": "2024-01-16",
+      "day": "tuesday",
+      "start_time": "14:00",
+      "end_time": "15:30",
+      "rider_id": 3,
+      "horse_id": 3,
+      "lesson_type": "private",
+      "instructor_id": 2,
+      "status": "completed",
+      "notes": "Jumping exercises - good form"
+    },
+    {
+      "id": 4,
+      "date": "2024-01-20",
+      "day": "saturday",
+      "start_time": "10:00",
+      "end_time": "11:30",
+      "rider_id": 1,
+      "horse_id": 2,
+      "lesson_type": "group",
+      "instructor_id": 2,
+      "status": "scheduled",
+      "notes": "Weekend group lesson"
+    }
+  ]
+}

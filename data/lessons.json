@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "name": "Adult Beginners Course",
+    "day": "monday",
+    "time": "20:00",
+    "duration": 45,
+    "description": "Group course for adult beginners",
+    "active": true,
+    "color": "#90EE90"
+  },
+  {
+    "id": 2,
+    "name": "Children's Pony Course",
+    "day": "saturday",
+    "time": "10:00",
+    "duration": 30,
+    "description": "Pony riding lessons for children 6-12 years",
+    "active": true,
+    "color": "#87CEEB"
+  },
+  {
+    "id": 3,
+    "name": "Advanced Jumping Course",
+    "day": "wednesday",
+    "time": "18:00",
+    "duration": 60,
+    "description": "Advanced jumping techniques and exercises",
+    "active": true,
+    "color": "#FFB6C1"
+  }
+]
