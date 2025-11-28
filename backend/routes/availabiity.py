@@ -1,67 +1,114 @@
 """
-Availability blueprint (formerly disponibilites)
-All CRUD operations for availability slots
+Availability API Routes
+Manages weekly availability slots
 """
 from flask import Blueprint, request, jsonify
 from models import db, Availability
+from sqlalchemy.exc import SQLAlchemyError
 
 availability_bp = Blueprint('availability', __name__)
 
+DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+
+
 @availability_bp.route('/availability', methods=['GET'])
 def get_availability():
-    """Get availability slots grouped by day"""
-    slots = Availability.query.all()
+    """Get all availability slots grouped by day"""
+    try:
+        slots = Availability.query.order_by(Availability.day, Availability.start_time).all()
 
-    # Group by day
-    result = {}
-    for slot in slots:
-        if slot.day not in result:
-            result[slot.day] = []
-        result[slot.day].append(slot.to_dict())
+        # Group by day
+        result = {day: [] for day in DAYS}
+        for slot in slots:
+            result[slot.day].append(slot.to_dict())
 
-    return jsonify(result)
+        return jsonify(result), 200
+    except SQLAlchemyError as e:
+        return jsonify({'error': str(e)}), 500
+
 
 @availability_bp.route('/availability/<string:day>', methods=['GET'])
-def get_day_availability(day):
-    """Get availability for a specific day"""
-    slots = Availability.query.filter_by(day=day).all()
-    return jsonify([s.to_dict() for s in slots])
+def get_availability_by_day(day):
+    """Get availability slots for a specific day"""
+    try:
+        if day.lower() not in DAYS:
+            return jsonify({'error': 'Invalid day'}), 400
+
+        slots = Availability.query.filter_by(day=day.lower()).order_by(Availability.start_time).all()
+        return jsonify([s.to_dict() for s in slots]), 200
+    except SQLAlchemyError as e:
+        return jsonify({'error': str(e)}), 500
+
 
 @availability_bp.route('/availability/<string:day>', methods=['PUT'])
-def update_day_availability(day):
-    """Update availability for a specific day"""
-    # Delete existing slots for this day
-    Availability.query.filter_by(day=day).delete()
+def update_availability_by_day(day):
+    """Replace all availability slots for a specific day"""
+    try:
+        if day.lower() not in DAYS:
+            return jsonify({'error': 'Invalid day'}), 400
 
-    # Add new slots
-    data = request.json
-    slots = data.get('slots', [])
+        data = request.get_json()
+        slots = data.get('slots', [])
 
-    for slot_data in slots:
-        slot = Availability(
-            day=day,
-            start_time=slot_data['start'],
-            end_time=slot_data['end'],
-            occupied=slot_data.get('occupied', False)
-        )
-        db.session.add(slot)
+        # Delete existing slots for this day
+        Availability.query.filter_by(day=day.lower()).delete()
 
-    db.session.commit()
-    return jsonify({'success': True, 'message': f'Availability updated for {day}'})
+        # Add new slots
+        for slot_data in slots:
+            slot = Availability(
+                day=day.lower(),
+                start_time=slot_data['start'],
+                end_time=slot_data['end']
+            )
+            db.session.add(slot)
+
+        db.session.commit()
+
+        # Return updated slots
+        updated_slots = Availability.query.filter_by(day=day.lower()).order_by(Availability.start_time).all()
+        return jsonify([s.to_dict() for s in updated_slots]), 200
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
 
 @availability_bp.route('/availability', methods=['POST'])
 def create_availability_slot():
-    """Create a new availability slot"""
-    data = request.json
+    """Create a single availability slot"""
+    try:
+        data = request.get_json()
 
-    slot = Availability(
-        day=data['day'],
-        start_time=data['start'],
-        end_time=data['end'],
-        occupied=data.get('occupied', False)
-    )
+        # Validate required fields
+        if not all(k in data for k in ['day', 'start_time', 'end_time']):
+            return jsonify({'error': 'day, start_time, and end_time are required'}), 400
 
-    db.session.add(slot)
-    db.session.commit()
+        if data['day'].lower() not in DAYS:
+            return jsonify({'error': 'Invalid day'}), 400
 
-    return jsonify(slot.to_dict()), 201
+        slot = Availability(
+            day=data['day'].lower(),
+            start_time=data['start_time'],
+            end_time=data['end_time']
+        )
+
+        db.session.add(slot)
+        db.session.commit()
+
+        return jsonify(slot.to_dict()), 201
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+
+@availability_bp.route('/availability/<int:slot_id>', methods=['DELETE'])
+def delete_availability_slot(slot_id):
+    """Delete a specific availability slot"""
+    try:
+        slot = Availability.query.get_or_404(slot_id)
+        db.session.delete(slot)
+        db.session.commit()
+
+        return jsonify({'message': 'Availability slot deleted successfully'}), 200
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500

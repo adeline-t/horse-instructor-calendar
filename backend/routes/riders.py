@@ -1,77 +1,120 @@
 """
-Riders blueprint (formerly cavaliers)
-All CRUD operations for riders
+Riders API Routes
+Handles CRUD operations for riders
 """
 from flask import Blueprint, request, jsonify
 from models import db, Rider
-from sqlalchemy import or_
+from sqlalchemy.exc import SQLAlchemyError
 
 riders_bp = Blueprint('riders', __name__)
 
+
 @riders_bp.route('/riders', methods=['GET'])
 def get_riders():
-    """Get all active riders"""
-    riders = Rider.query.filter_by(active=True).order_by(Rider.name).all()
-    return jsonify([r.to_dict() for r in riders])
+    """Get all riders"""
+    try:
+        riders = Rider.query.all()
+        return jsonify([r.to_dict() for r in riders]), 200
+    except SQLAlchemyError as e:
+        return jsonify({'error': str(e)}), 500
 
-@riders_bp.route('/riders/<int:id>', methods=['GET'])
-def get_rider(id):
-    """Get a specific rider"""
-    rider = Rider.query.get_or_404(id)
-    return jsonify(rider.to_dict())
+
+@riders_bp.route('/riders/<int:rider_id>', methods=['GET'])
+def get_rider(rider_id):
+    """Get single rider by ID"""
+    try:
+        rider = Rider.query.get_or_404(rider_id)
+        return jsonify(rider.to_dict()), 200
+    except SQLAlchemyError as e:
+        return jsonify({'error': str(e)}), 404
+
 
 @riders_bp.route('/riders', methods=['POST'])
 def create_rider():
-    """Create a new rider"""
-    data = request.json
+    """Create new rider"""
+    try:
+        data = request.get_json()
 
-    if not data.get('name'):
-        return jsonify({'error': 'Rider name is required'}), 400
+        # Validate required fields
+        if not data.get('name'):
+            return jsonify({'error': 'Name is required'}), 400
 
-    rider = Rider(
-        name=data['name'],
-        email=data.get('email'),
-        phone=data.get('phone'),
-        notes=data.get('notes')
-    )
+        rider = Rider(
+            name=data['name'],
+            email=data.get('email'),
+            phone=data.get('phone'),
+            level=data.get('level'),
+            notes=data.get('notes'),
+            active=data.get('active', True)
+        )
 
-    db.session.add(rider)
-    db.session.commit()
+        db.session.add(rider)
+        db.session.commit()
 
-    return jsonify(rider.to_dict()), 201
+        return jsonify(rider.to_dict()), 201
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
 
-@riders_bp.route('/riders/<int:id>', methods=['PUT'])
-def update_rider(id):
-    """Update an existing rider"""
-    rider = Rider.query.get_or_404(id)
-    data = request.json
 
-    rider.name = data.get('name', rider.name)
-    rider.email = data.get('email', rider.email)
-    rider.phone = data.get('phone', rider.phone)
-    rider.active = data.get('active', rider.active)
-    rider.notes = data.get('notes', rider.notes)
+@riders_bp.route('/riders/<int:rider_id>', methods=['PUT'])
+def update_rider(rider_id):
+    """Update existing rider"""
+    try:
+        rider = Rider.query.get_or_404(rider_id)
+        data = request.get_json()
 
-    db.session.commit()
-    return jsonify(rider.to_dict())
+        # Update fields
+        if 'name' in data:
+            rider.name = data['name']
+        if 'email' in data:
+            rider.email = data['email']
+        if 'phone' in data:
+            rider.phone = data['phone']
+        if 'level' in data:
+            rider.level = data['level']
+        if 'notes' in data:
+            rider.notes = data['notes']
+        if 'active' in data:
+            rider.active = data['active']
 
-@riders_bp.route('/riders/<int:id>', methods=['DELETE'])
-def delete_rider(id):
-    """Soft delete a rider"""
-    rider = Rider.query.get_or_404(id)
-    rider.active = False
-    db.session.commit()
-    return jsonify({'success': True, 'message': 'Rider deleted successfully'})
+        db.session.commit()
+        return jsonify(rider.to_dict()), 200
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+
+@riders_bp.route('/riders/<int:rider_id>', methods=['DELETE'])
+def delete_rider(rider_id):
+    """Delete rider (soft delete by setting active=False)"""
+    try:
+        rider = Rider.query.get_or_404(rider_id)
+
+        # Soft delete
+        rider.active = False
+        db.session.commit()
+
+        return jsonify({'message': 'Rider deactivated successfully'}), 200
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
 
 @riders_bp.route('/riders/search', methods=['GET'])
 def search_riders():
-    """Search riders"""
-    query = request.args.get('q', '')
-    riders = Rider.query.filter(
-        Rider.active == True,
-        or_(
-            Rider.name.ilike(f'%{query}%'),
-            Rider.email.ilike(f'%{query}%')
-        )
-    ).order_by(Rider.name).all()
-    return jsonify([r.to_dict() for r in riders])
+    """Search riders by name or email"""
+    try:
+        query = request.args.get('q', '')
+
+        if not query:
+            return jsonify([]), 200
+
+        riders = Rider.query.filter(
+            (Rider.name.ilike(f'%{query}%')) |
+            (Rider.email.ilike(f'%{query}%'))
+        ).all()
+
+        return jsonify([r.to_dict() for r in riders]), 200
+    except SQLAlchemyError as e:
+        return jsonify({'error': str(e)}), 500

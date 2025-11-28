@@ -1,41 +1,34 @@
 """
-Main Flask application
-Refactored to use MySQL with SQLAlchemy
-All French terms translated to English
+Equestrian Management System - Flask Application
+API-only backend (static files served separately)
 """
 from flask import Flask
 from flask_cors import CORS
 from config import Config
 from models import db
+from dotenv import load_dotenv
 
-# Import blueprints (will be created below)
-from routes.pages import pages_bp
-from routes.riders import riders_bp
-from routes.horses import horses_bp
-from routes.recurring_lessons import recurring_lessons_bp
-from routes.availability import availability_bp
-from routes.schedule import schedule_bp
-from routes.stats import stats_bp
+# Load environment variables (optional for local dev)
+load_dotenv()
 
-def create_app():
-    """Create and configure the Flask application"""
+def create_app(config_class=Config):
+    """Application factory"""
     app = Flask(__name__)
-    app.config.from_object(Config)
+    app.config.from_object(config_class)
 
     # Initialize extensions
     db.init_app(app)
-    CORS(app, origins=Config.CORS_ORIGINS)
+    CORS(app, origins=config_class.CORS_ORIGINS)
 
-    # Create tables
-    with app.app_context():
-        db.create_all()
-        print("✅ Database tables created/verified")
+    # Import blueprints
+    from routes.riders import riders_bp
+    from routes.horses import horses_bp
+    from routes.recurring_lessons import recurring_lessons_bp
+    from routes.availability import availability_bp
+    from routes.schedule import schedule_bp
+    from routes.stats import stats_bp
 
-    # Initialize directories for static files
-    Config.init_directories()
-
-    # Register blueprints
-    app.register_blueprint(pages_bp)
+    # Register blueprints (all under /api prefix)
     app.register_blueprint(riders_bp, url_prefix='/api')
     app.register_blueprint(horses_bp, url_prefix='/api')
     app.register_blueprint(recurring_lessons_bp, url_prefix='/api')
@@ -43,15 +36,19 @@ def create_app():
     app.register_blueprint(schedule_bp, url_prefix='/api')
     app.register_blueprint(stats_bp, url_prefix='/api')
 
-    print("✅ Application created successfully")
+    # Health check endpoint
+    @app.route('/health')
+    def health():
+        return {'status': 'healthy'}, 200
+
+    # Create tables on startup
+    with app.app_context():
+        db.create_all()
+        print("Database tables created successfully")
+
     return app
 
-# Create app instance for WSGI servers (Gunicorn, PythonAnywhere)
-app = create_app()
 
 if __name__ == '__main__':
-    app.run(
-        debug=Config.DEBUG,
-        host=Config.HOST,
-        port=Config.PORT
-    )
+    app = create_app()
+    app.run(debug=Config.DEBUG)
