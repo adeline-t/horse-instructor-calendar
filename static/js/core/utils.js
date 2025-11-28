@@ -5,7 +5,7 @@
 
 // Application Constants
 const APP_CONFIG = {
-    API_BASE_URL: '/api',
+    API_BASE_URL: 'https://leembory.pythonanywhere.com/api',
     DATE_FORMAT: 'YYYY-MM-DD',
     TIME_FORMAT: 'HH:mm',
     PAGINATION_SIZE: 10,
