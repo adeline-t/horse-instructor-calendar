@@ -1,18 +1,10 @@
-"""
-Equestrian Management System - Flask Application
-API-only backend (static files served separately)
-"""
 from flask import Flask
 from flask_cors import CORS
 from config import Config
 from models import db
-from dotenv import load_dotenv
-
-# Load environment variables (optional for local dev)
-load_dotenv()
 
 def create_app(config_class=Config):
-    """Application factory"""
+    """Application factory pattern"""
     app = Flask(__name__)
     app.config.from_object(config_class)
 
@@ -20,7 +12,7 @@ def create_app(config_class=Config):
     db.init_app(app)
     CORS(app, origins=config_class.CORS_ORIGINS)
 
-    # Import blueprints
+    # Register blueprints
     from routes.riders import riders_bp
     from routes.horses import horses_bp
     from routes.recurring_lessons import recurring_lessons_bp
@@ -28,7 +20,6 @@ def create_app(config_class=Config):
     from routes.schedule import schedule_bp
     from routes.stats import stats_bp
 
-    # Register blueprints (all under /api prefix)
     app.register_blueprint(riders_bp, url_prefix='/api')
     app.register_blueprint(horses_bp, url_prefix='/api')
     app.register_blueprint(recurring_lessons_bp, url_prefix='/api')
@@ -41,14 +32,15 @@ def create_app(config_class=Config):
     def health():
         return {'status': 'healthy'}, 200
 
-    # Create tables on startup
+    # Create database tables
     with app.app_context():
         db.create_all()
-        print("Database tables created successfully")
 
     return app
 
+# This is what gunicorn uses
+application = create_app()
 
 if __name__ == '__main__':
     app = create_app()
-    app.run(debug=Config.DEBUG)
+    app.run(debug=True)

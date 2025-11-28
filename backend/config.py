@@ -1,29 +1,38 @@
 """
-Application Configuration
+Configuration for Render.com Deployment
 """
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class Config:
-    """Base configuration"""
+    """Application configuration"""
 
-    # Flask
+    # Flask settings
     SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
     DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
-    # Database (MySQL on PythonAnywhere)
-    MYSQL_USER = os.environ.get('MYSQL_USER', 'your_username')
-    MYSQL_PASSWORD = os.environ.get('MYSQL_PASSWORD', 'your_password')
-    MYSQL_HOST = os.environ.get('MYSQL_HOST', 'your_username.mysql.pythonanywhere-services.com')
-    MYSQL_DB = os.environ.get('MYSQL_DB', 'your_username$equestrian_db')
+    # Database configuration
+    # Render provides DATABASE_URL for PostgreSQL
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
 
-    SQLALCHEMY_DATABASE_URI = f'mysql+pymysql://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}/{MYSQL_DB}'
+    # Fix Render's postgres:// URL to postgresql:// (SQLAlchemy requirement)
+    if SQLALCHEMY_DATABASE_URI and SQLALCHEMY_DATABASE_URI.startswith("postgres://"):
+        SQLALCHEMY_DATABASE_URI = SQLALCHEMY_DATABASE_URI.replace("postgres://", "postgresql://", 1)
+
+    # Fallback to SQLite for local development
+    if not SQLALCHEMY_DATABASE_URI:
+        basedir = os.path.abspath(os.path.dirname(__file__))
+        SQLALCHEMY_DATABASE_URI = f'sqlite:///{os.path.join(basedir, "equestrian.db")}'
+
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ENGINE_OPTIONS = {
         'pool_recycle': 280,
         'pool_pre_ping': True,
+        'pool_size': 10,
+        'max_overflow': 20
     }
 
-    # CORS
-    # TODO: Change this to your actual frontend domain(s) in production
-    # Example: ['https://yourusername.github.io', 'https://yourdomain.com']
+    # CORS configuration
     CORS_ORIGINS = os.environ.get('CORS_ORIGINS', '*').split(',')
